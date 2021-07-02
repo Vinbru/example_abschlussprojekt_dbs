@@ -1,0 +1,114 @@
+# DBS Programmierpraktikum - Phase 4 - Template
+
+## Anleitung
+
+Dies ist das auf Jersey beruhende Template für die API.
+
+### Vorbereitung
+
+In der IDE muss dieses Template als Gradle-Projekt importiert werden.
+
+### Allgemein
+
+Die Mainklasse ist ```de.hhu.cs.dbs.propra.Application```. Nachdem das Programm gestartet wurde, kann mit cURL der Server getestet werden.
+
+Die Datenbank muss in ```data``` liegen und den Namen ```database.db``` besitzen.
+
+Änderungen müssen hauptsächlich nur im Package ```de.hhu.cs.dbs.propra.presentation.rest``` vorgenommen werden. Dies umfasst auch das Anlegen von Controllern. Die darin enthaltene Klasse ```ExampleController``` dient als Beispiel dafür und muss für die Abgabe gelöscht werden. Zusätzlich müssen in der Klasse ```de.hhu.cs.dbs.propra.infrastructure.repositories.SQLiteUserRepository``` die mit ```TODO``` kommentierten SQL-Anweisungen entsprechend angepasst werden, um eine korrekte Authentifizierung und Authorisierung zu ermöglichen.
+
+### Nützliche Links
+
+- http://jdk.java.net[OpenJDK], https://adoptopenjdk.net[AdoptOpenJDK]
+- https://gradle.org[Gradle]
+- https://www.docker.com[Docker]
+- https://eclipse-ee4j.github.io/jersey/[Jersey]
+- https://curl.haxx.se[cURL]
+
+## Kritische Entscheidungen
+
+#### Datumsangaben
+Laut vorherigen Phasen sollen Datumsangaben IMMER im datetime() Format behandelt werden.
+Da hier nun häufig das date() Format verwendet wird, findet an einigen Stellen ein CAST von date() oder datetime() statt.
+Dies kann unter Umständen zu Problemen führen, wenn als Datum eine Zahl eingegeben wird, die nicht dem date() oder datetime() Format entspricht.
+Diese Zahl wird dann an diesen Stellen in das entsprechende Format umgewandelt und von der Datenbank akzeptiert, obwohl es sich um eine falsche Eingabe handelt.
+Lösen könnte man das Problem mit einer Überprüfung im Java-Code, welches aber laut Aufgabenstellung ausdrücklich ausgeschlossen wird.
+Oder per Änderung der Datenformate im sql Schema, welche das Casten überflüssig machen würde (Würde ebenfalls der Aufgabenstellung widersprechen).
+Der Aufgabenstellung folgend, kann es nun also vorkommen, dass beim Input von Zahlen als Datum, diese nicht mit einem 400er beantwortet werden,
+sondern also normale Datumsangabe interpretiert werden.
+Das Problem tritt bei GET Befehlen (Filterung) auf.
+Für POST und PATCH wurde das Problem durch einen zusätzlichen Check behoben.
+
+#### BOOLEAN, DOUBLE, INTEGER
+Parameter dieser Datentypen müssen korrekt oder garnicht (null) aufgerufen werden.
+Ein falsches oder leeres Aufrufen dieser Datentypen setzt diese in den Defaultzustand. (0 bzw. false)
+Grund dafür ist die Aufgabenstellung bedingte Unterlassung der Überprüfung auf Datentyp/Datenkorrektheit innerhalb von Java
+
+#### Attributnamen
+Um eine einfachere Übergabe der Attribute gemäß Aufgabenstellung zu ermöglichen, wurden einige Spaltennamen angepasst (primär Lowercase)
+
+#### Standardwerte
+Da in der Anforderungsbeschreibung, bis auf das Coverbild, aller Parameter als required markiert wurden habe ich auf Default Values in den POSTs verzichtet.
+Alle Parameter müssen also angegeben werden.
+Werte sind standardmäßig NULL, wobei BOOLEANS, DOUBLE und INTEGER bei unvollständiger/falscher initialisierung den Standardwert 0 annehmen.
+
+#### ROLES
+Zusätzlich zu BIBLIOTHEKAR und KUNDE besteht noch die ROLE NUTZER.
+Diese könnte genutzt werden, um die Zugriffsberechtigung auf alle registrierten Nutzer einzuschränken.
+Diese Rolle findet in den hier aufgeführten Endpunkten allerdings keine Anwendung.
+
+#### MEDIUM
+Der Table wurde in phase3 entfernt, da er durch die Beschränkung auf 4 Medientypen nicht notwendig war.
+Aufgrund der Struktur der API Endpunkte (Verwendung von mediumid), war es nun sinnvoll diesen wieder einzufuehren.
+
+#### DELETE ARTIKEL
+Löscht ebenfalls: EXEMPLAR, AUSLEIHE, AUTOR_VERFASST_ARTIKEL, ARTIKEL_EMPFIEHLT_ARTIKEL, ARTIKEL_GEHOERT_ZU_GENRE
+Es wurden entsprechende ON DELETE CASCADE hinzugefügt.
+Dies geschah in Anlehnung an die in der Übungsgruppe erörterten, aus der Doku nicht klar hervorgehenden Anforderungen.
+
+
+#### DELETE EXEMPLARE
+Löscht ebenfalls: AUSLEIHE
+Es wurden entsprechende ON DELETE CASCADE hinzugefügt.
+Dies geschah in Anlehnung an die in der Übungsgruppe erörterten, aus der Doku nicht klar hervorgehenden Anforderungen.
+
+#### DELETE AUTOREN
+Löscht ebenfalls: AUTOR_VERFASST_ARTIKEL
+Es wurden entsprechende ON DELETE CASCADE hinzugefügt.
+Dies geschah in Anlehnung an die in der Übungsgruppe erörterten, aus der Doku nicht klar hervorgehenden Anforderungen.
+
+
+#### GET MITARBEITER
+Gibt einen 301 mit auf /bibliothekare zurück, welcher dann, je nach Verfahren das Ergebnis mit 200 zurückgibt.
+Jenachdem wie euer Test hierzu aufgebaut ist, kann es also sein, dass Ihr einen 301 erwartet aber 200 erhaltet.
+Ich habe eure Anforderung so verstanden, wie ich es jetzt implementiert habe.
+/mitarbeiter gibt 301 zurück, welcher dann über den redirect auf bibliothekare einen 200 mit Inhalt zurückgibt.
+
+#### GET ARTIKEL
+laut Sprechstunde sollte das Coverbild im HEX Format ausgegeben werden.
+Nicht vorhandene Bilder werden nicht mit NULL, sondern als leerer String zurückgegeben.
+
+#### POST ARTIKEL
+Da ich mir nicht sicher bin wie Ihr das Coverbild genau einlesen wollt, habe ich es als Inputstream implementiert, welcher mit echten Daten auch funktioniert.
+In auskommentierter Form, ist es ebenfalls als String einlese implementiert.
+Der Grund für die Implementierung als Inputstresm ist der folgende:
+Aus den bisherigen Anforderungen ging hervor, dass wir die erhaltene Datei über die HEX() Funktion in die HEX-Ascii Interpretation überführen und diese dann mit dem PNG-typischen HEX Code abgleichen können.
+Mir ist es bisher nicht bekannt, wie man den Klartext, welcher den PNG-Hexcode erzeugen würde, in einem String abbilden kann, ohne dass er in curl bzw. java unbrauchbar wird.
+Dies liegt an den enthaltenen Sonderzeichen, welche bei meinen Versuchen weder von Curl noch von Java richtig verarbeitet werden konnten.
+Daher die entscheidung für den mit lokalen Dateien erprobten (hardcode) Upload in From eines Inputstreams.
+Aufgrund dessen habe ich mich ebenfalls dafür entschieden eine IO oder FileNotFound Exception nicht zum rollback führen zu lassen.
+
+#### POST EXEMPLARE
+Liegt kein entsprechender Standort vor, wird auch kein neuer erstellt, sondern der POST Befehl schlägt fehl.
+Dies entspricht meinem Verständnis der Aufgabenstellung, da bspw. bei POST KUNDEN und POST BIBLIOTHEKARE explizit angegeben wurde, dass ein entsprechender Nutzer angelegt werden soll.
+
+#### POST KUNDEN
+Legt einen KUNDEN zu einem mitgegebenem NUTZER an (NUTZER bereits vorhanden).
+Liegt noch kein entsprechender NUTZER vor, wird darüber hinaus ein neuer NUTZER angelegt.
+
+#### POST BIBLIOTHEKARE
+Legt einen BIBLIOTHEKAR zu einem mitgegebenem NUTZER an (NUTZER bereits vorhanden).
+Liegt noch kein entsprechender NUTZER vor, wird darüber hinaus ein neuer NUTZER angelegt.
+
+#### PATCH
+Patch Befehle mit Werten die den alten Werten entsprechen (Also keine Änderung bewirken), werden wie eine normale Änderung behandelt.
+

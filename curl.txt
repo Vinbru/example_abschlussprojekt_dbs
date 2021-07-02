@@ -1,0 +1,65 @@
+ADRESSEN
+GET
+curl -X GET  "http://localhost:8080/adressen" -H "accept: application/json;charset=UTF-8" -v
+PATCH
+curl -u Brillenschlange@Buecherwurm.de:Guent3rKr4ss -X PATCH  "http://localhost:8080/adressen?hausnummer=1010" -H "accept: */*" -v
+
+
+ARTIKEL
+GET
+curl -X GET  "http://localhost:8080/artikel" -H "accept: application/json;charset=UTF-8" -v
+POST
+curl -u NineToFiveNancy@UniBib.de:3ndlichFreitag -X POST  "http://localhost:8080/artikel" -H "accept: */*" -H "Content-Type: multipart/form-data" -F "autorid=1" -F "genreid=2" -F "mediumid=3" -F "isbn=123-456-789" -F "erscheinungsdatum=2000-01-02" -F "beschreibung=TestArtikelBeschreibung" -F "bezeichnung=TestArtikelBezeichnung" -v
+DELETE
+curl -u NineToFiveNancy@UniBib.de:3ndlichFreitag -X DELETE  "http://localhost:8080/artikel/4" -H "accept: */*" -v
+
+
+AUSLEIHEN
+GET
+curl -u Jojo@Allstar.net:IsThis4JoJoReference -X GET  "http://localhost:8080/ausleihen" -H "accept: application/json;charset=UTF-8" -v
+POST
+curl -u Brillenschlange@Buecherwurm.de:Guent3rKr4ss -X POST  "http://localhost:8080/ausleihen" -H "accept: */*" -H "Content-Type: multipart/form-data" -F "exemplarid=9" -F "zurueckgegeben=false" -F "beginn=2021-03-22" -F "ende=2021-03-29" -v
+PATCH
+curl -u NineToFiveNancy@UniBib.de:3ndlichFreitag -X PATCH  "http://localhost:8080/ausleihen/4?zurueckgegeben=true" -H "accept: */*" -v
+
+
+AUTOREN
+GET
+curl -X GET  "http://localhost:8080/autoren" -H "accept: application/json;charset=UTF-8" -v
+POST
+curl -u NineToFiveNancy@UniBib.de:3ndlichFreitag -X POST  "http://localhost:8080/autoren" -H "accept: */*" -H "Content-Type: multipart/form-data" -F "vorname=TestAutorenVorname" -F "nachname=TestAutorenNachname" -v
+DELETE
+curl -u NineToFiveNancy@UniBib.de:3ndlichFreitag -X DELETE  "http://localhost:8080/autoren/4" -H "accept: */*" -v
+
+
+BIBLIOTHEKARE
+GET (bibliothekare)
+curl -X GET  "http://localhost:8080/bibliothekare" -H "accept: application/json;charset=UTF-8" -v
+GET (mitarbeiter)
+curl -X GET  "http://localhost:8080/mitarbeiter" -H "accept: application/json;charset=UTF-8" -v
+POST
+curl -X POST "http://localhost:8080/bibliothekare" -H "accept: */*" -H "Content-Type: multipart/form-data" -F "email=testbibliothekar@testmail.de" -F "passwort=t3stP4asswort"  -F "vorname=Bibovorname" -F "nachname=Bibonachname" -F "geburtsdatum=1980-03-22" -F "telefonnummer=0049123456789" -v
+
+
+EXEMPLARE
+GET
+curl -X GET  "http://localhost:8080/exemplare" -H "accept: application/json;charset=UTF-8" -v
+POST
+curl -u NineToFiveNancy@UniBib.de:3ndlichFreitag -X POST  "http://localhost:8080/exemplare" -H "accept: */*" -H "Content-Type: multipart/form-data" -F "artikelid=3" -F "regal=6" -F "preis=14.59" -F "etage=-1" -v
+DELETE
+curl -u NineToFiveNancy@UniBib.de:3ndlichFreitag -X DELETE  "http://localhost:8080/exemplare/2" -H "accept: */*" -v
+
+
+GENRES
+GET
+curl -X GET  "http://localhost:8080/genres" -H "accept: application/json;charset=UTF-8" -v
+POST
+curl -u NineToFiveNancy@UniBib.de:3ndlichFreitag -X POST  "http://localhost:8080/genres" -H "accept: */*" -H "Content-Type: multipart/form-data" -F "bezeichnung=TestGenre" -v
+
+
+KUNDEN
+GET
+curl -X GET  "http://localhost:8080/kunden" -H "accept: application/json;charset=UTF-8" -v
+POST
+curl -X POST "http://localhost:8080/kunden" -H "accept: */*" -H "Content-Type: multipart/form-data" -F "email=testkunde@testmail.de" -F "passwort=t3stP4asswort"  -F "vorname=Kundevorname" -F "nachname=Kundenachname" -F "geburtsdatum=2015-06-22" -F "guthaben=2.5" -F "beitragsbefreit=true" -F "adresseid=1" -v
+
